@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>管理者合同研修　出席者リスト</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>  
+    <h1>2024年度　管理者合同研修　出席者リスト</h1>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div class="file-input-container">
+            <label for="xlsx-file-input" class="file-input-label">出席者リスト（Excel形式）を選択してください:</label>
+            <input type="file" id="xlsx-file-input" accept=".xlsx">
+        </div>
+        <div class="group-button" id="group-button">グループ決め</div>
+    </div>
+    <div class="tabs" id="corporation-tabs">
+        <!-- JavaScriptでタブが追加されます -->
+    </div>
+    <div class="tabs" id="furigana-tabs">
+        <!-- JavaScriptでタブが追加されます -->
+    </div>
+    <div class="table-container">
+        <table id="attendees-table" border="1">
+            <thead>
+                <tr>
+                    <th>出席</th>
+                    <th>氏名</th>
+                    <th>フリガナ</th>
+                    <th>法人名</th>
+                    <th>事業所名</th>
+                </tr>
+            </thead>
+            <tbody id="attendees-body">
+                <!-- JavaScriptで行が追加されます -->
+            </tbody>
+        </table>
+    </div>
+    <!-- モーダルウィンドウの要素を追加 -->
+    <div id="overlay" class="overlay"></div>
+    <div id="modal" class="modal">
+        <div class="button-container">
+            <button id="regroup-button" class="group-button">再グループ分け</button>
+            <button id="confirm-save-button" class="group-button">保存</button>
+        </div>
+        <div id="group-results"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script type="module" src="main.js"></script>
+    <!-- <script type="module" src="fileHandlers.js"></script> -->
+</body>
+</html>

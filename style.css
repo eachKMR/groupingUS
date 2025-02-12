@@ -1,0 +1,166 @@
+@charset "utf-8";
+
+/* 全てリセット */
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* --------------- */
+/* 全体的なスタイル */
+/* --------------- */
+body {
+    background-color: #e0f7fa; /* 淡いスカイブルー */
+}
+
+/* -------------------- */
+/* ファイル選択のスタイル */
+/* -------------------- */
+.file-input-container {
+    display: flex;
+    align-items: center;
+}
+.file-input-label {
+    margin-right: 10px;
+}
+[type="file"] {
+    font-style: italic;
+}
+
+/* ---------------- */
+/* テーブルのスタイル */
+/* ---------------- */
+.table-container {
+    max-height: 600px;
+    overflow-y: auto;   /* 縦スクロールバーのみ表示 */
+    border: 1px solid #ddd;
+    background-color: #e6f7ff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff; /* テーブルデータは白 */
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background-color: #b3e0ff; /* テーブルヘッダは今のまま */
+}
+
+/* 出欠チェックボックス用のスタイル */
+.attendance-checkbox {
+    /* ここにスタイルを追加 */
+}
+
+/* ---------------- */
+/* ボタンのスタイル */
+/* ---------------- */
+.tabs {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.tab {
+    padding: 10px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    background-color: #d3d3d3; /* 淡いグレー */
+}
+
+.tab.active {   /* JavaScriptで付け外しするクラス */
+    background-color: #c0c0c0; /* 選択中は少しだけ色を濃く */
+    border-bottom: 1px solid #a9a9a9;
+}
+
+.button-container {
+    position: sticky;
+    top: 0;
+    background-color: skyblue;
+    padding: 10px;
+    z-index: 1000;
+}
+
+.group-button {
+    margin-left: 10px;
+    padding: 10px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background-color: #d3d3d3; /* 淡いグレー */
+    border-radius: 5px; /* 角を丸くする */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* ボックスシャドウ */
+    transition: background-color 0.3s, box-shadow 0.3s; /* 押したことがわかるように */
+}
+
+.group-button:active {
+    background-color: #b0b0b0; /* 押したときの色 */
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2); /* 押したときのボックスシャドウ */
+}
+
+/* モーダルのスタイル */
+#preview-window {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+}
+
+#group-results {
+    margin-bottom: 20px;
+}
+
+#regroup-button, #confirm-save-button {
+    margin-right: 10px;
+}
+
+/* オーバーレイのスタイル */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒 */
+    z-index: 999; /* モーダルウィンドウの下に表示 */
+    display: none; /* 初期状態では非表示 */
+}
+
+.overlay.show {
+    display: block; /* 表示時のスタイル */
+}
+
+.overlay.hide {
+    display: none; /* 非表示時のスタイル */
+}
+
+/* モーダルウィンドウのスタイル */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000; /* オーバーレイの上に表示 */
+    overflow-y: auto; /* 縦スクロールを有効にする */
+    max-height: 90vh; /* モーダルの最大高さを設定 */
+    display: none; /* 初期状態では非表示 */
+}
+
+.modal.show {
+    display: block; /* 表示時のスタイル */
+}
+
+.modal.hide {
+    display: none; /* 非表示時のスタイル */
+}
