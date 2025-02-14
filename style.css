@@ -27,6 +27,50 @@ body {
     font-style: italic;
 }
 
+/* grouping-container クラスのスタイル */
+.grouping-container {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* 子要素間のスペースを追加 */
+    border: 2px solid #000; /* 黒のsolid線で囲む */
+    border-radius: 10px; /* 角に丸みを持たせる */
+    padding: 10px; /* 内側の余白を追加 */
+}
+
+/* ----------------------------------- */
+/* group-size-container クラスのスタイル */
+/* ----------------------------------- */
+.group-size-container {
+    margin: 10px 0; /* 上下の外側の余白を追加 */
+}
+
+/* ----------------------------------- */
+/* 数を選ぶところのスタイル */
+/* ----------------------------------- */
+.select-style {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    appearance: none; /* デフォルトの矢印を非表示にする */
+    -webkit-appearance: none; /* Safari用 */
+    -moz-appearance: none; /* Firefox用 */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23333" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 600px) {
+    .select-style {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
 /* ---------------- */
 /* テーブルのスタイル */
 /* ---------------- */

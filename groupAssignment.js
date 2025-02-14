@@ -1,12 +1,17 @@
 import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME, COLUMN_FURIGANA, COLUMN_PRESENT,
-    GROUP_SIZE, MIN_GROUP_SIZE, ROUND_SIZE,
+    GROUP_SIZE, getGroupSize, setGroupSize, getMinGroupSize, ROUND_SIZE,
     FURIGANA_INITIALS,
     attendees,
     corporateGroups,
     clearCorporateGroups, setCorporateGroup, 
     setNumGroups,
     getNumGroups,
-    isErrorNumGroups } from './shareData.js';
+    isErrorNumGroups,
+    getRoundSize, } from './shareData.js'; 
+
+import { renderGroupResults } from './renderGroupResults.js';
+import { saveGroupResult } from './saveGroupResult.js';
+import { isGroupingBySize } from './GroupSettings.js';
 
 'use strict';
 
@@ -19,27 +24,41 @@ function shuffle(array) {
     return array;
 }
 
-// 出席者をフィルタリングして presentCorporateGroups を作成する関数
+// 出席（予定）者を【present===1】でフィルタリングして当日の出席者を返す関数
 function createPresentCorporateGroups() {
     const presentCorporateGroups = new Map();
-    corporateGroups.forEach((group, corporateName) => {
-        const filteredGroup = group.filter(attendee => attendee.present === 1);
+    corporateGroups.forEach((corporateAttendees, corporateName) => { // 法人ごとに処理
+        const filteredGroup = corporateAttendees.filter(attendee => attendee.present === 1);
         if (filteredGroup.length > 0) {
             presentCorporateGroups.set(corporateName, filteredGroup);
         }
     });
-    console.log('presentCorporateGroups:', presentCorporateGroups);
     return presentCorporateGroups;
 }
 
 // グループ数を計算する関数
 function calculateNumGroups(presentCorporateGroups) {
-    const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;
-    setNumGroups(Math.ceil(totalAttendees / GROUP_SIZE));
+    const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   
+    console.log('calculateNumGroups:GROUP_SIZE:', getGroupSize());
+    setNumGroups(Math.ceil(totalAttendees / getGroupSize()));   // グループ数を割り出す（小数点切り上げ）
     console.log('calculateNumGroups:num_groups:', getNumGroups());
     if (isErrorNumGroups()) {
         console.error('Error: isErrorNumGroups() === true. Cannot assign groups.');
         alert('グループ分けできません。出席者がいないか、１グループあたりの人数が大きすぎます。');
+        return false;
+    }
+    return true;
+}
+
+// グループあたりの人数を計算する関数
+function calculateGroupSize(presentCorporateGroups) {
+    const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   // 出席者の総数
+    console.log('calculateGroupSize:num_groups:', getNumGroups());
+    setGroupSize(Math.ceil(totalAttendees / getNumGroups()));   // グループあたりの人数を割り出す（小数点切り上げ）
+    console.log('calculateGroupSize:GROUP_SIZE:', getGroupSize());
+    if (getGroupSize() <= 0) {
+        console.error('Error: getGroupSize() <= 0. Cannot assign groups.');
+        alert('グループ分けできません。グループ数が多すぎます。');
         return false;
     }
     return true;
@@ -50,8 +69,14 @@ export function handleGroupAssignment() {
     console.log('handleGroupAssignment called', corporateGroups);
 
     const presentCorporateGroups = createPresentCorporateGroups();
-    if (!calculateNumGroups(presentCorporateGroups)) {
-        return;
+    if (isGroupingBySize()) {   // ラジオボタンが「グループ人数」の場合
+        if (!calculateNumGroups(presentCorporateGroups)) {  // グループ数を計算
+            return;
+        }
+    } else {                    // ラジオボタンが「グループ数」の場合
+        if (!calculateGroupSize(presentCorporateGroups)) {  // グループあたりの人数を計算
+            return; 
+        }
     }
 
     // グループ分けを実行
@@ -61,7 +86,7 @@ export function handleGroupAssignment() {
     displayGroupResults(balancedGroupAssignments);
 }
 
-// グループ分けを実行する関数
+// 出席者のグループ分けを実行する関数
 export function assignBalancedGroups(presentCorporateGroups) {
     console.log('assignBalancedGroups called', presentCorporateGroups);
     console.log('num_groups:', getNumGroups());
@@ -71,14 +96,14 @@ export function assignBalancedGroups(presentCorporateGroups) {
     }
 
     const assignments = []; // グループ分けの結果を格納する配列
-    // 各出席者が過去に同じグループに入った出席者を記録するオブジェクト
-    const previousMembers = {};
+    // 各出席者が過去に同じグループに入った出席者を記録するマップ
+    const previousMembers = new Map();
 
     // 法人ごとの出席者リストを配列化して、操作しやすくする
     const corporateGroupsArray = Array.from(presentCorporateGroups.values());
 
     // 指定されたラウンド数だけグループ分けを行う
-    for (let round = 0; round < ROUND_SIZE; round++) {
+    for (let round = 0; round < getRoundSize(); round++) {
         // groups（配列）をnum_groups個の空の配列で初期化する
         let groups = Array.from({ length: getNumGroups() }, () => []);
         console.log('groups:', groups);
@@ -88,53 +113,46 @@ export function assignBalancedGroups(presentCorporateGroups) {
         console.log('corporateGroupsArray:', corporateGroupsArray);
 
         // 各法人ごとにグループに割り当てる
+        let groupIndex = 0;
         corporateGroupsArray.forEach(corporate => {
             console.log('assigned corporate:', corporate);
-            let groupIndex = 0;
+            // let groupIndex = 0;
             let attempts = 0; // attempts 変数を宣言
             corporate.forEach(attendee => {
                 // 過去に同じグループに入った出席者を避ける
-                while (previousMembers[attendee.name] && previousMembers[attendee.name].some(member => groups[groupIndex].includes(member))) {
-                    groupIndex = (groupIndex + 1) % getNumGroups();
+                console.log(`Checking attendee: ${attendee.name}`);
+                console.log(`previousMembers.get(${attendee.name}):`, previousMembers.get(attendee.name));
+                if (previousMembers.get(attendee.name)) {
+                    console.log(`previousMembers.get(${attendee.name}).some(member => groups[groupIndex].includes(member)):`,
+                        previousMembers.get(attendee.name).some(member => groups[groupIndex].includes(member)));
+                }
+            
+                while (previousMembers.get(attendee.name)
+                    && previousMembers.get(attendee.name).some(member => groups[groupIndex].includes(member))) {
+                    groupIndex = (groupIndex + 1) % getNumGroups(); // 次のグループに移動
+                    console.log(`groupIndex:${groupIndex} attempts:${attempts}`);
                     attempts++;
                     if (attempts >= getNumGroups()) {
+                        console.log(`Breaking out of loop to avoid infinite loop for attendee: ${attendee.name}`);
                         break; // 無限ループを回避するためにループを抜ける
                     }
                 }
-                groups[groupIndex].push(attendee);
-                if (!previousMembers[attendee.name]) {
-                    previousMembers[attendee.name] = [];
-                }
-                previousMembers[attendee.name].push(...groups[groupIndex].map(member => member.name));
-                groupIndex = (groupIndex + 1) % getNumGroups();
+                groups[groupIndex].push(attendee);  // 出席者をグループに追加
+                groupIndex = (groupIndex + 1) % getNumGroups(); // 次のグループに移動
             });
         });
-        console.log('previousMembers:', previousMembers);
+        console.log('groups before balancing:', groups);
 
-        // グループのサイズを調整
+        // 同じグループに入った出席者を記録
         groups.forEach(group => {
-            while (group.length > GROUP_SIZE) {
-                const extraAttendee = group.pop();
-                const smallestGroup = groups.reduce((smallest, current) => current.length < smallest.length ? current : smallest, groups[0]);
-                smallestGroup.push(extraAttendee);
-            }
-        });
-
-        // MIN_GROUP_SIZE人未満のグループに含まれている人たちを収集
-        const smallGroups = groups.filter(group => group.length < MIN_GROUP_SIZE);
-        const remainingAttendees = smallGroups.flat();
-
-        // MIN_GROUP_SIZE人未満のグループを除外
-        groups = groups.filter(group => group.length >= MIN_GROUP_SIZE);
-
-        // MIN_GROUP_SIZE人未満のグループがある場合、GROUP_SIZE + 1を許容し、num_groupsを1つ減らす
-        if (groups.length < getNumGroups()) {
-            setNumGroups(groups.length);
-            groups = Array.from({ length: getNumGroups() }, () => []);
-            remainingAttendees.forEach((attendee, index) => {
-                groups[index % getNumGroups()].push(attendee);
+            group.forEach(attendee => {
+                if (!previousMembers.has(attendee.name)) { 
+                    previousMembers.set(attendee.name, []);
+                }
+                // 現在のグループのメンバーを追加
+                previousMembers.get(attendee.name).push(...group.map(member => member.name));
             });
-        }
+        });
 
         // 現在のラウンドのグループ分け結果を assignments に追加
         assignments.push(groups);
@@ -142,77 +160,10 @@ export function assignBalancedGroups(presentCorporateGroups) {
         console.log('assignments:', assignments);
     }
 
+    console.log('previousMembers:', previousMembers);
+
     // 全てのラウンドのグループ分け結果を返す
     return assignments;
-}
-
-// 偶数文字目を '●' に置き換える関数
-function maskName(name) {
-    return name.split('').map((char, index) => (index % 2 === 1 ? '●' : char)).join('');
-}
-
-// 出席者データを保存する関数
-export function saveAttendance(groupAssignments) {
-    console.log('Saving group assignments:', groupAssignments);
-
-    const workbook = XLSX.utils.book_new();
-    const worksheetData1 = [];
-    const worksheetData2 = [];
-
-    // Sheet1: グループごとの出席者リスト
-    groupAssignments.forEach((assignment, round) => {
-        worksheetData1.push([`グループワーク第${round + 1}回`]);
-        assignment.forEach((group, index) => {
-            const groupData = [`グループ ${index + 1}`, ...group.map(a => `${a.name}@${a.department}`)];
-            worksheetData1.push(groupData);
-        });
-        worksheetData1.push([]); // 空行を追加
-    });
-
-    const worksheet1 = XLSX.utils.aoa_to_sheet(worksheetData1);
-    XLSX.utils.book_append_sheet(workbook, worksheet1, 'Sheet1');
-
-    // Sheet2: 出席者@部署を軸に各ラウンドのグループ番号を表示
-    const attendeeMap = new Map();
-
-    groupAssignments.forEach((assignment, round) => {
-        assignment.forEach((group, index) => {
-            group.forEach(attendee => {
-                const key = `${attendee.name}@${attendee.department}`;
-                if (!attendeeMap.has(key)) {
-                    attendeeMap.set(key, { name: attendee.name, department: attendee.department, groups: [] });
-                }
-                attendeeMap.get(key).groups[round] = `グループ ${index + 1}`;
-            });
-        });
-    });
-
-    // 1行目に列名を追加
-    const headerRow = ['氏名', '事業所', '法人名'];
-    for (let i = 1; i <= groupAssignments.length; i++) {
-        headerRow.push(`第${i}回`);
-    }
-    worksheetData2.push(headerRow);
-
-    // 出席者データを追加
-    corporateGroups.forEach((group, corporateName) => {
-        group.forEach(attendee => {
-            const key = `${attendee.name}@${attendee.department}`;
-            if (attendeeMap.has(key)) {
-                const data = attendeeMap.get(key);
-                const maskedName = maskName(data.name);
-                const row = [maskedName, data.department, corporateName, ...data.groups];
-                worksheetData2.push(row);
-            }
-        });
-    });
-
-    const worksheet2 = XLSX.utils.aoa_to_sheet(worksheetData2);
-    XLSX.utils.book_append_sheet(workbook, worksheet2, 'Sheet2');
-
-    // ファイルを保存
-    XLSX.writeFile(workbook, 'グループ分け.xlsx');
-    console.log('File saved to グループ分け.xlsx');
 }
 
 // グループ分け結果を表示する関数
@@ -220,7 +171,6 @@ function displayGroupResults(groupAssignments) {
     // オーバーレイとモーダルウィンドウの要素を取得
     const overlay = document.getElementById('overlay');
     const modal = document.getElementById('modal');
-    const groupResultsDiv = document.getElementById('group-results');
     const regroupButton = document.getElementById('regroup-button');
     const confirmSaveButton = document.getElementById('confirm-save-button');
 
@@ -249,79 +199,6 @@ function displayGroupResults(groupAssignments) {
         overlay.classList.remove('show');
     }
 
-    // XSS対策のためのエスケープ関数
-    function escapeHtml(unsafe) {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-    
-    // グループ分け結果を表示する関数
-    function renderGroupResults(assignments) {
-        console.log(`Rendering group assignments:`, assignments);
-        groupResultsDiv.innerHTML = ''; // 既存の内容をクリア
-    
-        assignments.forEach((assignment, round) => {
-            const roundDiv = document.createElement('div');
-            roundDiv.textContent = `◆グループワーク第${round + 1}回:`;
-            roundDiv.style.marginTop = '20px';
-            roundDiv.style.font = 'bold 16px Meiryo sans-serif';
-    
-            const table = document.createElement('table');
-            const thead = document.createElement('thead');
-            const tbody = document.createElement('tbody');
-    
-            // テーブルのヘッダーを作成
-            const headerRow = document.createElement('tr');
-            const thGroupNumber = document.createElement('th');
-            thGroupNumber.textContent = '番号';
-            headerRow.appendChild(thGroupNumber);
-    
-            // グループごとに氏名と所属をヘッダーに追加
-            for (let i = 0; i < assignment[0].length; i++) {
-                const thName = document.createElement('th');
-                thName.textContent = '氏名';
-                thName.style.borderLeft = 'solid 1px'; // 縦罫線を追加
-                headerRow.appendChild(thName);
-    
-                const thDepartment = document.createElement('th');
-                thDepartment.textContent = '所属';
-                headerRow.appendChild(thDepartment);
-            }
-            thead.appendChild(headerRow);
-    
-            // テーブルのボディを作成
-            assignment.forEach((group, index) => {
-                const row = document.createElement('tr');
-    
-                const tdGroupNumber = document.createElement('td');
-                tdGroupNumber.textContent = `グループ ${index + 1}`;
-                row.appendChild(tdGroupNumber);
-    
-                group.forEach(attendee => {
-                    const tdName = document.createElement('td');
-                    tdName.textContent = escapeHtml(attendee.name);
-                    tdName.style.borderLeft = 'solid 1px'; // 縦罫線を追加
-                    row.appendChild(tdName);
-    
-                    const tdDepartment = document.createElement('td');
-                    tdDepartment.textContent = escapeHtml(attendee.department);
-                    row.appendChild(tdDepartment);
-                });
-    
-                tbody.appendChild(row);
-            });
-    
-            table.appendChild(thead);
-            table.appendChild(tbody);
-            roundDiv.appendChild(table);
-            groupResultsDiv.appendChild(roundDiv);
-        });
-    }
-
     // 初回のグループ分け結果を表示
     renderGroupResults(groupAssignments);
 
@@ -341,6 +218,6 @@ function displayGroupResults(groupAssignments) {
     });
 
     confirmSaveButton.addEventListener('click', function () {
-        saveAttendance(groupAssignments);
+        saveGroupResult(groupAssignments);
     });
 }
