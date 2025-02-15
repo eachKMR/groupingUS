@@ -2,35 +2,35 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8">
-        <title>管理者合同研修　出席者リスト</title>
+        <title>グループ分けするよ</title>
         <link rel="stylesheet" href="style.css">
     </head>
     <body>  
-        <h1>2024年度　管理者合同研修　出席者リスト</h1>
+        <!-- <h1>グループ分けするよ</h1> -->
         <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div class="file-input-container">
+            <div class="common-container file-input-container">
                 <label for="xlsx-file-input" class="file-input-label">出席者リスト（Excel形式）を選択してください:</label>
                 <input type="file" id="xlsx-file-input" accept=".xlsx">
             </div>
-            <div class="grouping-container">
+            <div class="common-container grouping-container disabled">
                 <div class="round-size-container">
-                    <label for="round-size-select">ラウンド数を選択してください:</label>
-                    <select id="round-size-select" class="select-style">
+                    <label for="round-size-select">回数を選択してください:</label>
+                    <select id="round-size-select" class="select-style" disabled>
                         <!-- JavaScriptでオプションが追加されます -->
                     </select>
                 </div>
                 <div class="group-size-container">
                     <label>
-                        <input type="radio" name="group-option" value="size" checked> グループ人数
+                        <input type="radio" name="group-option" value="size" checked disabled> グループの人数
                     </label>
                     <label>
-                        <input type="radio" name="group-option" value="count"> グループ数
+                        <input type="radio" name="group-option" value="count" disabled> グループの数
                     </label>
-                    <select id="group-size-select" class="select-style">
+                    <select id="group-size-select" class="select-style" disabled>
                         <!-- JavaScriptでオプションが追加されます -->
                     </select>
                 </div>
-                <div class="group-button" id="group-button">グループ決め</div>
+                <div class="group-button" id="group-button" disabled>グループ分けをする</div>
             </div>
         </div>
         <div class="tabs" id="corporation-tabs">

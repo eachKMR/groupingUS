@@ -22,6 +22,8 @@ export function handleFileChange(event) {
         // console.log('File selected:', file);
         reader.onload = handleFileLoad; // ファイル読み込み完了時の処理を登録
         reader.readAsArrayBuffer(file); // ファイルをバイナリ形式で非同期に読み込む
+               // 読み込みが成功したら grouping-container を有効化する
+               enableGroupingContainer();
     }
 }
 
@@ -43,6 +45,16 @@ export function handleFileLoad(e) {
         console.error('Error reading file:', error);
         alert('ファイルの読み込み中にエラーが発生しました。');
     }
+}
+
+
+// ファイルが正しく読み込まれた後に grouping-container を有効化する関数
+function enableGroupingContainer() {
+    const groupingContainer = document.querySelector('.grouping-container');
+    groupingContainer.classList.remove('disabled');
+    groupingContainer.querySelectorAll('select, input, .group-button').forEach(element => {
+        element.disabled = false;
+    });
 }
 
 // 出席者データを準備する関数
