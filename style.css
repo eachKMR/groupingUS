@@ -36,7 +36,7 @@ body {
 /* ファイル選択のスタイル */
 /* -------------------- */
 .file-input-container {
-    display: block;
+    display: block; /* ブロック要素にする */
 }
 
 .file-input-label {

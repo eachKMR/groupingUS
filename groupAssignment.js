@@ -21,7 +21,7 @@ function shuffle(array) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
-    return array;
+    return array;   // シャッフル後の配列を返す
 }
 
 // 出席（予定）者を【present===1】でフィルタリングして当日の出席者を返す関数
@@ -83,7 +83,7 @@ export function handleGroupAssignment() {
     const balancedGroupAssignments = assignBalancedGroups(presentCorporateGroups);
     console.log('balancedGroupAssignments:', balancedGroupAssignments);
     // グループ分け結果を表示
-    displayGroupResults(balancedGroupAssignments);
+    displayResultsModal(balancedGroupAssignments);
 }
 
 // 出席者のグループ分けを実行する関数
@@ -166,8 +166,12 @@ export function assignBalancedGroups(presentCorporateGroups) {
     return assignments;
 }
 
+let groupAssignments; // 関数の外部で変数を定義
+
 // グループ分け結果を表示する関数
-function displayGroupResults(groupAssignments) {
+function displayResultsModal(initialGroupAssignments) {
+    groupAssignments = initialGroupAssignments; // 初期値を設定
+
     // オーバーレイとモーダルウィンドウの要素を取得
     const overlay = document.getElementById('overlay');
     const modal = document.getElementById('modal');
