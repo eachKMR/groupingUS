@@ -9,8 +9,8 @@ import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME, COLUMN_FURIGANA,
     isErrorNumGroups,
     getRoundSize, } from './shareData.js'; 
 
-import { renderGroupResults } from './renderGroupResults.js';
-import { saveGroupResult } from './saveGroupResult.js';
+import { renderGroupResults, displayResultsModal } from './renderGroupResults.js';
+// import { saveGroupResult } from './saveGroupResult.js'; // 不要になったインポートを削除
 import { isGroupingBySize } from './GroupSettings.js';
 
 'use strict';
@@ -25,7 +25,7 @@ function shuffle(array) {
 }
 
 // 出席（予定）者を【present===1】でフィルタリングして当日の出席者を返す関数
-function createPresentCorporateGroups() {
+export function createPresentCorporateGroups() {
     const presentCorporateGroups = new Map();
     corporateGroups.forEach((corporateAttendees, corporateName) => { // 法人ごとに処理
         const filteredGroup = corporateAttendees.filter(attendee => attendee.present === 1);
@@ -37,11 +37,11 @@ function createPresentCorporateGroups() {
 }
 
 // グループ数を計算する関数
-function calculateNumGroups(presentCorporateGroups) {
+export function calculateNumGroups(presentCorporateGroups) {
     const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   
-    console.log('calculateNumGroups:GROUP_SIZE:', getGroupSize());
+    // console.log('calculateNumGroups:GROUP_SIZE:', getGroupSize());
     setNumGroups(Math.ceil(totalAttendees / getGroupSize()));   // グループ数を割り出す（小数点切り上げ）
-    console.log('calculateNumGroups:num_groups:', getNumGroups());
+    // console.log('calculateNumGroups:num_groups:', getNumGroups());
     if (isErrorNumGroups()) {
         console.error('Error: isErrorNumGroups() === true. Cannot assign groups.');
         alert('グループ分けできません。出席者がいないか、１グループあたりの人数が大きすぎます。');
@@ -53,9 +53,9 @@ function calculateNumGroups(presentCorporateGroups) {
 // グループあたりの人数を計算する関数
 function calculateGroupSize(presentCorporateGroups) {
     const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   // 出席者の総数
-    console.log('calculateGroupSize:num_groups:', getNumGroups());
+    // console.log('calculateGroupSize:num_groups:', getNumGroups());
     setGroupSize(Math.ceil(totalAttendees / getNumGroups()));   // グループあたりの人数を割り出す（小数点切り上げ）
-    console.log('calculateGroupSize:GROUP_SIZE:', getGroupSize());
+    // console.log('calculateGroupSize:GROUP_SIZE:', getGroupSize());
     if (getGroupSize() <= 0) {
         console.error('Error: getGroupSize() <= 0. Cannot assign groups.');
         alert('グループ分けできません。グループ数が多すぎます。');
@@ -66,7 +66,7 @@ function calculateGroupSize(presentCorporateGroups) {
 
 // グループ分けボタンがクリックされたときの処理
 export function handleGroupAssignment() {
-    console.log('handleGroupAssignment called', corporateGroups);
+    // console.log('handleGroupAssignment called', corporateGroups);
 
     const presentCorporateGroups = createPresentCorporateGroups();
     if (isGroupingBySize()) {   // ラジオボタンが「グループ人数」の場合
@@ -80,16 +80,16 @@ export function handleGroupAssignment() {
     }
 
     // グループ分けを実行
-    const balancedGroupAssignments = assignBalancedGroups(presentCorporateGroups);
-    console.log('balancedGroupAssignments:', balancedGroupAssignments);
+    const { assignments, previousMembers } = assignBalancedGroups(presentCorporateGroups);
+    // console.log('balancedGroupAssignments:', assignments);
     // グループ分け結果を表示
-    displayResultsModal(balancedGroupAssignments);
+    displayResultsModal(assignments, previousMembers);
 }
 
 // 出席者のグループ分けを実行する関数
 export function assignBalancedGroups(presentCorporateGroups) {
-    console.log('assignBalancedGroups called', presentCorporateGroups);
-    console.log('num_groups:', getNumGroups());
+    // console.log('assignBalancedGroups called', presentCorporateGroups);
+    // console.log('num_groups:', getNumGroups());
 
     if (isErrorNumGroups()) {
         throw new Error('num_groups is 0. これじゃグループ分けができないよ！');
@@ -106,34 +106,33 @@ export function assignBalancedGroups(presentCorporateGroups) {
     for (let round = 0; round < getRoundSize(); round++) {
         // groups（配列）をnum_groups個の空の配列で初期化する
         let groups = Array.from({ length: getNumGroups() }, () => []);
-        console.log('groups:', groups);
+        // console.log('groups:', groups);
 
         // 法人ごとの出席者リストをシャッフルしてランダムな順序にする
         corporateGroupsArray.forEach(group => shuffle(group));
-        console.log('corporateGroupsArray:', corporateGroupsArray);
+        // console.log('corporateGroupsArray:', corporateGroupsArray);
 
         // 各法人ごとにグループに割り当てる
-        let groupIndex = 0;
+        let groupIndex = 0; // グループのインデックスを初期化（法人ごとに初期化されないように外に出す）
         corporateGroupsArray.forEach(corporate => {
-            console.log('assigned corporate:', corporate);
-            // let groupIndex = 0;
+            // console.log('assigned corporate:', corporate);
             let attempts = 0; // attempts 変数を宣言
             corporate.forEach(attendee => {
                 // 過去に同じグループに入った出席者を避ける
-                console.log(`Checking attendee: ${attendee.name}`);
-                console.log(`previousMembers.get(${attendee.name}):`, previousMembers.get(attendee.name));
+                // console.log(`Checking attendee: ${attendee.name}`);
+                // console.log(`previousMembers.get(${attendee.name}):`, previousMembers.get(attendee.name));
                 if (previousMembers.get(attendee.name)) {
-                    console.log(`previousMembers.get(${attendee.name}).some(member => groups[groupIndex].includes(member)):`,
-                        previousMembers.get(attendee.name).some(member => groups[groupIndex].includes(member)));
+                    // console.log(`previousMembers.get(${attendee.name}).some(member => groups[groupIndex].includes(member)):`,
+                        previousMembers.get(attendee.name).some(member => groups[groupIndex].includes(member));
                 }
             
                 while (previousMembers.get(attendee.name)
                     && previousMembers.get(attendee.name).some(member => groups[groupIndex].includes(member))) {
                     groupIndex = (groupIndex + 1) % getNumGroups(); // 次のグループに移動
-                    console.log(`groupIndex:${groupIndex} attempts:${attempts}`);
+                    // console.log(`groupIndex:${groupIndex} attempts:${attempts}`);
                     attempts++;
                     if (attempts >= getNumGroups()) {
-                        console.log(`Breaking out of loop to avoid infinite loop for attendee: ${attendee.name}`);
+                        // console.log(`Breaking out of loop to avoid infinite loop for attendee: ${attendee.name}`);
                         break; // 無限ループを回避するためにループを抜ける
                     }
                 }
@@ -141,7 +140,7 @@ export function assignBalancedGroups(presentCorporateGroups) {
                 groupIndex = (groupIndex + 1) % getNumGroups(); // 次のグループに移動
             });
         });
-        console.log('groups before balancing:', groups);
+        // console.log('groups before balancing:', groups);
 
         // 同じグループに入った出席者を記録
         groups.forEach(group => {
@@ -156,72 +155,12 @@ export function assignBalancedGroups(presentCorporateGroups) {
 
         // 現在のラウンドのグループ分け結果を assignments に追加
         assignments.push(groups);
-        console.log(`round ${round + 1} `);
-        console.log('assignments:', assignments);
+        // console.log(`round ${round + 1} `);
+        // console.log('assignments:', assignments);
     }
 
-    console.log('previousMembers:', previousMembers);
+    // console.log('previousMembers:', previousMembers);
 
-    // 全てのラウンドのグループ分け結果を返す
-    return assignments;
-}
-
-let groupAssignments; // 関数の外部で変数を定義
-
-// グループ分け結果を表示する関数
-function displayResultsModal(initialGroupAssignments) {
-    groupAssignments = initialGroupAssignments; // 初期値を設定
-
-    // オーバーレイとモーダルウィンドウの要素を取得
-    const overlay = document.getElementById('overlay');
-    const modal = document.getElementById('modal');
-    const regroupButton = document.getElementById('regroup-button');
-    const confirmSaveButton = document.getElementById('confirm-save-button');
-
-    // オーバーレイを表示
-    overlay.classList.add('show');
-    overlay.classList.remove('hide');
-    modal.classList.add('show');
-    modal.classList.remove('hide');
-
-    // オーバーレイをクリックしたときにモーダルウィンドウを閉じる
-    overlay.addEventListener('click', hideModal);
-
-    // モーダルウィンドウを表示する関数
-    function showModal() {
-        modal.classList.add('show');
-        modal.classList.remove('hide');
-        overlay.classList.add('show');
-        overlay.classList.remove('hide');
-    }
-
-    // モーダルウィンドウを非表示にする関数
-    function hideModal() {
-        modal.classList.add('hide');
-        modal.classList.remove('show');
-        overlay.classList.add('hide');
-        overlay.classList.remove('show');
-    }
-
-    // 初回のグループ分け結果を表示
-    renderGroupResults(groupAssignments);
-
-    // モーダルウィンドウを表示
-    showModal();
-
-    // ボタンのイベントリスナーを設定
-    regroupButton.addEventListener('click', function () {
-        const presentCorporateGroups = createPresentCorporateGroups();
-        if (!calculateNumGroups(presentCorporateGroups)) {
-            return;
-        }
-
-        const balancedGroupAssignments = assignBalancedGroups(presentCorporateGroups);
-        renderGroupResults(balancedGroupAssignments);
-        groupAssignments = balancedGroupAssignments; // 新しいグループ分け結果を保存
-    });
-
-    confirmSaveButton.addEventListener('click', function () {
-        saveGroupResult(groupAssignments);
-    });
+    // 全てのラウンドのグループ分け結果と previousMembers を返す
+    return { assignments, previousMembers };
 }
