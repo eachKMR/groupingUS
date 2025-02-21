@@ -10,7 +10,6 @@ import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME, COLUMN_FURIGANA,
     getRoundSize, } from './shareData.js'; 
 
 import { renderGroupResults, displayResultsModal } from './renderGroupResults.js';
-// import { saveGroupResult } from './saveGroupResult.js'; // 不要になったインポートを削除
 import { isGroupingBySize } from './GroupSettings.js';
 
 'use strict';
@@ -39,9 +38,7 @@ export function createPresentCorporateGroups() {
 // グループ数を計算する関数
 export function calculateNumGroups(presentCorporateGroups) {
     const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   
-    // console.log('calculateNumGroups:GROUP_SIZE:', getGroupSize());
     setNumGroups(Math.ceil(totalAttendees / getGroupSize()));   // グループ数を割り出す（小数点切り上げ）
-    // console.log('calculateNumGroups:num_groups:', getNumGroups());
     if (isErrorNumGroups()) {
         console.error('Error: isErrorNumGroups() === true. Cannot assign groups.');
         alert('グループ分けできません。出席者がいないか、１グループあたりの人数が大きすぎます。');
@@ -53,9 +50,7 @@ export function calculateNumGroups(presentCorporateGroups) {
 // グループあたりの人数を計算する関数
 function calculateGroupSize(presentCorporateGroups) {
     const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   // 出席者の総数
-    // console.log('calculateGroupSize:num_groups:', getNumGroups());
     setGroupSize(Math.ceil(totalAttendees / getNumGroups()));   // グループあたりの人数を割り出す（小数点切り上げ）
-    // console.log('calculateGroupSize:GROUP_SIZE:', getGroupSize());
     if (getGroupSize() <= 0) {
         console.error('Error: getGroupSize() <= 0. Cannot assign groups.');
         alert('グループ分けできません。グループ数が多すぎます。');
@@ -66,8 +61,6 @@ function calculateGroupSize(presentCorporateGroups) {
 
 // グループ分けボタンがクリックされたときの処理
 export function handleGroupAssignment() {
-    // console.log('handleGroupAssignment called', corporateGroups);
-
     const presentCorporateGroups = createPresentCorporateGroups();
     if (isGroupingBySize()) {   // ラジオボタンが「グループ人数」の場合
         if (!calculateNumGroups(presentCorporateGroups)) {  // グループ数を計算
@@ -81,16 +74,12 @@ export function handleGroupAssignment() {
 
     // グループ分けを実行
     const { assignments, previousMembers } = assignBalancedGroups(presentCorporateGroups);
-    // console.log('balancedGroupAssignments:', assignments);
     // グループ分け結果を表示
     displayResultsModal(assignments, previousMembers);
 }
 
 // 出席者のグループ分けを実行する関数
 export function assignBalancedGroups(presentCorporateGroups) {
-    // console.log('assignBalancedGroups called', presentCorporateGroups);
-    // console.log('num_groups:', getNumGroups());
-
     if (isErrorNumGroups()) {
         throw new Error('num_groups is 0. これじゃグループ分けができないよ！');
     }
@@ -104,43 +93,47 @@ export function assignBalancedGroups(presentCorporateGroups) {
 
     // 指定されたラウンド数だけグループ分けを行う
     for (let round = 0; round < getRoundSize(); round++) {
+        
         // groups（配列）をnum_groups個の空の配列で初期化する
         let groups = Array.from({ length: getNumGroups() }, () => []);
-        // console.log('groups:', groups);
 
         // 法人ごとの出席者リストをシャッフルしてランダムな順序にする
         corporateGroupsArray.forEach(group => shuffle(group));
-        // console.log('corporateGroupsArray:', corporateGroupsArray);
 
         // 各法人ごとにグループに割り当てる
         let groupIndex = 0; // グループのインデックスを初期化（法人ごとに初期化されないように外に出す）
         corporateGroupsArray.forEach(corporate => {
-            // console.log('assigned corporate:', corporate);
-            let attempts = 0; // attempts 変数を宣言
             corporate.forEach(attendee => {
+                let attempts = 0; // attempts 変数を初期化
+                const maxAttempts = getNumGroups() * 2; // 最大試行回数を設定
+
                 // 過去に同じグループに入った出席者を避ける
-                // console.log(`Checking attendee: ${attendee.name}`);
-                // console.log(`previousMembers.get(${attendee.name}):`, previousMembers.get(attendee.name));
-                if (previousMembers.get(attendee.name)) {
-                    // console.log(`previousMembers.get(${attendee.name}).some(member => groups[groupIndex].includes(member)):`,
-                        previousMembers.get(attendee.name).some(member => groups[groupIndex].includes(member));
-                }
-            
-                while (previousMembers.get(attendee.name)
-                    && previousMembers.get(attendee.name).some(member => groups[groupIndex].includes(member))) {
-                    groupIndex = (groupIndex + 1) % getNumGroups(); // 次のグループに移動
-                    // console.log(`groupIndex:${groupIndex} attempts:${attempts}`);
+                const previousGroupMembers = previousMembers.get(attendee.name) || [];
+
+                while ((previousGroupMembers.some(member => groups[groupIndex].some(g => g.name === member)) || groups[groupIndex].length >= getGroupSize()) && attempts < maxAttempts) {
+                    groupIndex = (groupIndex + 1) % getNumGroups(); // シーケンシャルに次のグループに移動
                     attempts++;
-                    if (attempts >= getNumGroups()) {
-                        // console.log(`Breaking out of loop to avoid infinite loop for attendee: ${attendee.name}`);
-                        break; // 無限ループを回避するためにループを抜ける
+                }
+
+                // 最後のチェック：グループの人数が getGroupSize() を超えないようにする
+                if (groups[groupIndex].length >= getGroupSize()) {
+                    let foundGroup = false;
+                    for (let i = 0; i < getNumGroups(); i++) {
+                        if (groups[i].length < getGroupSize()) {
+                            groupIndex = i;
+                            foundGroup = true;
+                            break;
+                        }
+                    }
+                    if (!foundGroup) {
+                        console.error(`No available group found for ${attendee.name}. This should not happen.`);
                     }
                 }
+
                 groups[groupIndex].push(attendee);  // 出席者をグループに追加
                 groupIndex = (groupIndex + 1) % getNumGroups(); // 次のグループに移動
             });
         });
-        // console.log('groups before balancing:', groups);
 
         // 同じグループに入った出席者を記録
         groups.forEach(group => {
@@ -155,11 +148,7 @@ export function assignBalancedGroups(presentCorporateGroups) {
 
         // 現在のラウンドのグループ分け結果を assignments に追加
         assignments.push(groups);
-        // console.log(`round ${round + 1} `);
-        // console.log('assignments:', assignments);
     }
-
-    // console.log('previousMembers:', previousMembers);
 
     // 全てのラウンドのグループ分け結果と previousMembers を返す
     return { assignments, previousMembers };

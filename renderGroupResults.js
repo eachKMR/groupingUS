@@ -22,7 +22,7 @@ export function renderGroupResults(assignments, previousMembers) {
   const groupResultsDiv = document.getElementById('group-results');
 
   groupResultsDiv.innerHTML = ''; // 既存の内容をクリア
-  console.log('Previous members:', previousMembers);
+  // console.log('Previous members:', previousMembers);
 
   assignments.forEach((assignment, round) => {
     const roundDiv = document.createElement('div');
@@ -82,13 +82,13 @@ export function renderGroupResults(assignments, previousMembers) {
       // 条件判定とセルの色変更を追加
       groupMembers.forEach(({ attendee }) => {
         const otherMembers = group.filter(g => g.name !== attendee.name);
-        console.log(`Other members in the current group for ${attendee.name}:`, otherMembers);
+        // console.log(`Other members in the current group for ${attendee.name}:`, otherMembers);
 
         otherMembers.forEach(om => {
           const previousGroup = previousMembers.get(om.name);
-          console.log(`Previous group for ${om.name}:`, previousGroup);
+          // console.log(`Previous group for ${om.name}:`, previousGroup);
           if (previousGroup && previousGroup.filter(name => name === attendee.name).length > 1) {
-            console.log(`Member ${attendee.name} has been in the same group with others more than once.`);
+            // console.log(`Member ${attendee.name} has been in the same group with others more than once.`);
             const otherMember = groupMembers.find(member => member.attendee.name === om.name);
             if (otherMember) {
               otherMember.tdName.style.backgroundColor = 'yellow';
