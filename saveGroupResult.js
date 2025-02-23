@@ -21,6 +21,13 @@ export function saveGroupResult(groupAssignments) {
         right: { style: 'thin' }
     };
 
+    // フォントスタイルを定義
+    const fontStyle = {
+        name: 'BIZ UDPゴシック',
+        sz: 12,
+        color: { rgb: '000000' }
+    };
+
     // Sheet1: グループごとの出席者リスト
     groupAssignments.forEach((assignment, round) => {
         worksheetData1.push([`グループ分け第${round + 1}回`]);
@@ -44,7 +51,7 @@ export function saveGroupResult(groupAssignments) {
                 if (!attendeeMap.has(key)) {
                     attendeeMap.set(key, { name: attendee.name, department: attendee.department, groups: [] });
                 }
-                attendeeMap.get(key).groups[round] = `Grp ${index + 1}`;
+                attendeeMap.get(key).groups[round] = index + 1;
             });
         });
     });
@@ -52,7 +59,7 @@ export function saveGroupResult(groupAssignments) {
     // 1行目に列名を追加
     const headerRow = ['氏名', '事業所', '法人名'];
     for (let i = 1; i <= groupAssignments.length; i++) {
-        headerRow.push(`第${i}回`);
+        headerRow.push(`第${i}回のグループ`);
     }
     worksheetData2.push(headerRow);
 
@@ -71,14 +78,14 @@ export function saveGroupResult(groupAssignments) {
 
     const worksheet2 = XLSX.utils.aoa_to_sheet(worksheetData2);
 
-    // 罫線を追加
+    // 罫線とフォントを追加
     const range = XLSX.utils.decode_range(worksheet2['!ref']);
     for (let R = range.s.r; R <= range.e.r; ++R) {
         for (let C = range.s.c; C <= range.e.c; ++C) {
             const cell_address = { c: C, r: R };
             const cell_ref = XLSX.utils.encode_cell(cell_address);
             if (!worksheet2[cell_ref]) worksheet2[cell_ref] = { t: 's', v: '' };
-            worksheet2[cell_ref].s = { border: borderStyle };
+            worksheet2[cell_ref].s = { border: borderStyle, font: fontStyle };
         }
     }
 

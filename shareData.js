@@ -10,6 +10,7 @@ export const COLUMN_DEPARTMENT = 1;
 export const COLUMN_NAME = 2;
 export const COLUMN_FURIGANA = 3;
 export const COLUMN_PRESENT = 4;
+export const COLUMN_FIRSTGROUP = 5;
 
 // 法人ごとの出席者リストを保持するマップ及び関数の宣言
 export const corporateGroups = new Map();

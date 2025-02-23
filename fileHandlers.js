@@ -1,5 +1,4 @@
-import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME, COLUMN_FURIGANA, COLUMN_PRESENT,
-        GROUP_SIZE, ROUND_SIZE,
+import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME, COLUMN_FURIGANA, COLUMN_PRESENT, COLUMN_FIRSTGROUP,
         FURIGANA_INITIALS,
         attendees,
         clearAttendees, addAttendee,
@@ -38,15 +37,12 @@ export function handleFileLoad(e) {
         console.log('Parsed attendees:', parsedAttendees);
         clearAttendees(); // attendees配列を初期化
         parsedAttendees.forEach(row => addAttendee(row)); // パースしたデータをattendees配列に追加
-        // attendees.length = 0; // attendees配列を初期化
-        // attendees.push(...parsedAttendees); // パースしたデータをattendees配列に追加
         prepareAttendeeData();
     } catch (error) {
         console.error('Error reading file:', error);
         alert('ファイルの読み込み中にエラーが発生しました。');
     }
 }
-
 
 // ファイルが正しく読み込まれた後に grouping-container を有効化する関数
 function enableGroupingContainer() {
@@ -63,20 +59,21 @@ export function prepareAttendeeData() {
     const furiganaMap = new Map(FURIGANA_INITIALS.map(initial => [initial, []]));
     attendees.forEach((attendee, index) => {
         if (index === 0) return;
-        const [corporateName, department, name, furigana, present] = [
+        const [corporateName, department, name, furigana, present, firstGroup] = [
             attendee[COLUMN_CORPORATE_NAME],
             attendee[COLUMN_DEPARTMENT],
             attendee[COLUMN_NAME],
             attendee[COLUMN_FURIGANA],
-            attendee[COLUMN_PRESENT]
+            attendee[COLUMN_PRESENT],
+            attendee[COLUMN_FIRSTGROUP] || '' // F列が空の場合は空文字列を設定
         ];
         if (!corporateName || !department || !name) return;
         if (!companyMap.has(corporateName)) {
             companyMap.set(corporateName, []);
         }
-        companyMap.get(corporateName).push({ name, department, furigana, present, index });
+        companyMap.get(corporateName).push({ name, department, furigana, present, firstGroup, index });
         const initial = furigana ? getFuriganaInitial(furigana.charAt(0)) : 'その他';
-        furiganaMap.get(initial).push({ corporateName, department, name, furigana, present, index });
+        furiganaMap.get(initial).push({ corporateName, department, name, furigana, present, firstGroup, index });
     });
 
     // 出席者リストをフリガナ順にソート    

@@ -1,1 +1,189 @@
-(function(_0x18fe60,_0x684dbb){const _0x2ca7da=_0x2cf8,_0x462b5a=_0x18fe60();while(!![]){try{const _0xf9ee2d=-parseInt(_0x2ca7da(0x130))/0x1+-parseInt(_0x2ca7da(0x121))/0x2*(parseInt(_0x2ca7da(0x12b))/0x3)+-parseInt(_0x2ca7da(0x122))/0x4+-parseInt(_0x2ca7da(0x134))/0x5*(parseInt(_0x2ca7da(0x120))/0x6)+-parseInt(_0x2ca7da(0x133))/0x7+-parseInt(_0x2ca7da(0x11f))/0x8+parseInt(_0x2ca7da(0x12e))/0x9;if(_0xf9ee2d===_0x684dbb)break;else _0x462b5a['push'](_0x462b5a['shift']());}catch(_0x108b0e){_0x462b5a['push'](_0x462b5a['shift']());}}}(_0x5727,0xe2503));import{COLUMN_CORPORATE_NAME,COLUMN_DEPARTMENT,COLUMN_NAME,COLUMN_FURIGANA,COLUMN_PRESENT,GROUP_SIZE,getGroupSize,setGroupSize,getMinGroupSize,ROUND_SIZE,FURIGANA_INITIALS,attendees,corporateGroups,clearCorporateGroups,setCorporateGroup,setNumGroups,getNumGroups,isErrorNumGroups,getRoundSize}from'./shareData.js';import{renderGroupResults,displayResultsModal}from'./renderGroupResults.js';import{isGroupingBySize}from'./GroupSettings.js';'use\x20strict';function shuffle(_0x3b22cc){const _0x253f62=_0x2cf8;for(let _0x543b7c=_0x3b22cc['length']-0x1;_0x543b7c>0x0;_0x543b7c--){const _0xb68a26=Math[_0x253f62(0x136)](Math[_0x253f62(0x135)]()*(_0x543b7c+0x1));[_0x3b22cc[_0x543b7c],_0x3b22cc[_0xb68a26]]=[_0x3b22cc[_0xb68a26],_0x3b22cc[_0x543b7c]];}return _0x3b22cc;}function _0x5727(){const _0x415c3f=['has','name','441IctzIC','グループ分けできません。グループ数が多すぎます。','values','46855620iKHziD','from','1202509odiKEZ','error','No\x20available\x20group\x20found\x20for\x20','2383199RwTpTH','1145fBVWqy','random','floor','push','pop','get','flat','ceil','map','4973120HWCPiX','30840YXUZpu','6524FaPRcg','1832084NpFDpb','set','.\x20This\x20should\x20not\x20happen.','some','forEach','グループ分けできません。出席者がいないか、１グループあたりの人数が大きすぎます。','length'];_0x5727=function(){return _0x415c3f;};return _0x5727();}export function createPresentCorporateGroups(){const _0x23d278=new Map();return corporateGroups['forEach']((_0xa1ed46,_0x323775)=>{const _0x9de170=_0x2cf8,_0x27c8f5=_0xa1ed46['filter'](_0x15310b=>_0x15310b['present']===0x1);_0x27c8f5['length']>0x0&&_0x23d278[_0x9de170(0x123)](_0x323775,_0x27c8f5);}),_0x23d278;}export function calculateNumGroups(_0xf56c7b){const _0x3e7fba=_0x2cf8,_0x554d59=Array[_0x3e7fba(0x12f)](_0xf56c7b[_0x3e7fba(0x12d)]())['flat']()[_0x3e7fba(0x128)];setNumGroups(Math[_0x3e7fba(0x13b)](_0x554d59/getGroupSize()));if(isErrorNumGroups())return console[_0x3e7fba(0x131)]('Error:\x20isErrorNumGroups()\x20===\x20true.\x20Cannot\x20assign\x20groups.'),alert(_0x3e7fba(0x127)),![];return!![];}function _0x2cf8(_0x27b336,_0x357217){const _0x5727ad=_0x5727();return _0x2cf8=function(_0x2cf8f7,_0x3aafad){_0x2cf8f7=_0x2cf8f7-0x11e;let _0x255444=_0x5727ad[_0x2cf8f7];return _0x255444;},_0x2cf8(_0x27b336,_0x357217);}function calculateGroupSize(_0x28fedc){const _0x307915=_0x2cf8,_0x3ee08e=Array['from'](_0x28fedc[_0x307915(0x12d)]())[_0x307915(0x13a)]()['length'];setGroupSize(Math['ceil'](_0x3ee08e/getNumGroups()));if(getGroupSize()<=0x0)return console[_0x307915(0x131)]('Error:\x20getGroupSize()\x20<=\x200.\x20Cannot\x20assign\x20groups.'),alert(_0x307915(0x12c)),![];return!![];}export function handleGroupAssignment(){const _0x54e252=createPresentCorporateGroups();if(isGroupingBySize()){if(!calculateNumGroups(_0x54e252))return;}else{if(!calculateGroupSize(_0x54e252))return;}const {assignments:_0x2d7ac4,previousMembers:_0x3472d7}=assignBalancedGroups(_0x54e252);displayResultsModal(_0x2d7ac4,_0x3472d7);}export function assignBalancedGroups(_0xb82381){const _0x8604f4=_0x2cf8;if(isErrorNumGroups())throw new Error('num_groups\x20is\x200.\x20これじゃグループ分けができないよ！');const _0x496096=[],_0x2bbf2c=new Map(),_0xb34367=Array[_0x8604f4(0x12f)](_0xb82381[_0x8604f4(0x12d)]());for(let _0x5d08c5=0x0;_0x5d08c5<getRoundSize();_0x5d08c5++){let _0x3ab49e=Array[_0x8604f4(0x12f)]({'length':getNumGroups()},()=>[]);_0xb34367[_0x8604f4(0x126)](_0x342795=>shuffle(_0x342795));let _0x5b4aa0=0x0;_0xb34367[_0x8604f4(0x126)](_0x1a9907=>{const _0xfca832=_0x8604f4;_0x1a9907[_0xfca832(0x126)](_0x1734d4=>{const _0x30781a=_0xfca832;let _0x7f5db=0x0;const _0x4e5252=getNumGroups()*0x2,_0x4f60a1=_0x2bbf2c['get'](_0x1734d4['name'])||[];while((_0x4f60a1['some'](_0x3b9bd1=>_0x3ab49e[_0x5b4aa0][_0x30781a(0x125)](_0x5977c7=>_0x5977c7['name']===_0x3b9bd1))||_0x3ab49e[_0x5b4aa0][_0x30781a(0x128)]>=getGroupSize())&&_0x7f5db<_0x4e5252){_0x5b4aa0=(_0x5b4aa0+0x1)%getNumGroups(),_0x7f5db++;}if(_0x3ab49e[_0x5b4aa0]['length']>=getGroupSize()){let _0x6cbe1=![];for(let _0x5de0b3=0x0;_0x5de0b3<getNumGroups();_0x5de0b3++){if(_0x3ab49e[_0x5de0b3][_0x30781a(0x128)]<getGroupSize()){_0x5b4aa0=_0x5de0b3,_0x6cbe1=!![];break;}}!_0x6cbe1&&console[_0x30781a(0x131)](_0x30781a(0x132)+_0x1734d4['name']+_0x30781a(0x124));}_0x3ab49e[_0x5b4aa0]['push'](_0x1734d4),_0x5b4aa0=(_0x5b4aa0+0x1)%getNumGroups();});}),_0x3ab49e['forEach']((_0x5c96fa,_0x501098)=>{const _0x4341ec=_0x8604f4;while(_0x5c96fa[_0x4341ec(0x128)]<getMinGroupSize()){for(let _0x5deabb=0x0;_0x5deabb<getNumGroups();_0x5deabb++){if(_0x5deabb!==_0x501098&&_0x3ab49e[_0x5deabb][_0x4341ec(0x128)]>getMinGroupSize()){_0x5c96fa[_0x4341ec(0x137)](_0x3ab49e[_0x5deabb][_0x4341ec(0x138)]());break;}}}}),_0x3ab49e['forEach'](_0x25c32c=>{const _0x5007b5=_0x8604f4;_0x25c32c[_0x5007b5(0x126)](_0x4d2a36=>{const _0x561245=_0x5007b5;!_0x2bbf2c[_0x561245(0x129)](_0x4d2a36[_0x561245(0x12a)])&&_0x2bbf2c[_0x561245(0x123)](_0x4d2a36[_0x561245(0x12a)],[]),_0x2bbf2c[_0x561245(0x139)](_0x4d2a36[_0x561245(0x12a)])['push'](..._0x25c32c[_0x561245(0x11e)](_0x2afc35=>_0x2afc35[_0x561245(0x12a)]));});}),_0x496096['push'](_0x3ab49e);}return{'assignments':_0x496096,'previousMembers':_0x2bbf2c};}
+import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME, COLUMN_FURIGANA, COLUMN_PRESENT,
+    GROUP_SIZE, getGroupSize, setGroupSize, getMinGroupSize, ROUND_SIZE,
+    FURIGANA_INITIALS,
+    attendees,
+    corporateGroups,
+    clearCorporateGroups, setCorporateGroup, 
+    setNumGroups,
+    getNumGroups,
+    isErrorNumGroups,
+    getRoundSize, } from './shareData.js'; 
+
+import { renderGroupResults, displayResultsModal } from './renderGroupResults.js';
+import { isGroupingBySize } from './GroupSettings.js';
+
+'use strict';
+
+// シャッフル関数（フィッシャー・イェーツのシャッフル）
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;   // シャッフル後の配列を返す
+}
+
+// 出席（予定）者を【present===1】でフィルタリングして当日の出席者を返す関数
+export function createPresentCorporateGroups() {
+    const presentCorporateGroups = new Map();
+    corporateGroups.forEach((corporateAttendees, corporateName) => { // 法人ごとに処理
+        const filteredGroup = corporateAttendees.filter(attendee => attendee.present === 1);
+        if (filteredGroup.length > 0) {
+            presentCorporateGroups.set(corporateName, filteredGroup);
+        }
+    });
+    return presentCorporateGroups;
+}
+
+// グループ数を計算する関数
+export function calculateNumGroups(presentCorporateGroups) {
+    const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   
+    setNumGroups(Math.ceil(totalAttendees / getGroupSize()));   // グループ数を割り出す（小数点切り上げ）
+    // console.log(`Group size: ${getGroupSize()}  Num groups: ${getNumGroups()}`);
+    if (isErrorNumGroups()) {
+        console.error('Error: isErrorNumGroups() === true. Cannot assign groups.');
+        alert('グループ分けできません。出席者がいないか、１グループあたりの人数が大きすぎます。');
+        return false;
+    }
+    return true;
+}
+
+// グループあたりの人数を計算する関数
+function calculateGroupSize(presentCorporateGroups) {
+    const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   // 出席者の総数
+    setGroupSize(Math.ceil(totalAttendees / getNumGroups()));   // グループあたりの人数を割り出す（小数点切り上げ）
+    // console.log(`Group size: ${getGroupSize()}  Num groups: ${getNumGroups()}`);
+    if (getGroupSize() <= 0) {
+        console.error('Error: getGroupSize() <= 0. Cannot assign groups.');
+        alert('グループ分けできません。グループ数が多すぎます。');
+        return false;
+    }
+    return true;
+}
+
+// グループ分けボタンがクリックされたときの処理
+export function handleGroupAssignment() {
+    const presentCorporateGroups = createPresentCorporateGroups();
+    if (isGroupingBySize()) {   // ラジオボタンが「グループ人数」の場合
+        if (!calculateNumGroups(presentCorporateGroups)) {  // グループ数を計算
+            return;
+        }
+    } else {                    // ラジオボタンが「グループ数」の場合
+        if (!calculateGroupSize(presentCorporateGroups)) {  // グループあたりの人数を計算
+            return; 
+        }
+    }
+
+    // グループ分けを実行
+    const { assignments, previousMembers } = assignBalancedGroups(presentCorporateGroups);
+    // グループ分け結果を表示
+    displayResultsModal(assignments, previousMembers);
+}
+
+// 出席者のグループ分けを実行する関数
+export function assignBalancedGroups(presentCorporateGroups) {
+    if (isErrorNumGroups()) {
+        throw new Error('num_groups is 0. これじゃグループ分けができないよ！');
+    }
+
+    const assignments = []; // グループ分けの結果を格納する配列
+    // 各出席者が過去に同じグループに入った出席者を記録するマップ
+    const previousMembers = new Map();
+
+    // 法人ごとの出席者リストを配列化して、操作しやすくする
+    const corporateGroupsArray = Array.from(presentCorporateGroups.values());
+
+    // 指定されたラウンド数だけグループ分けを行う
+    for (let round = 0; round < getRoundSize(); round++) {
+        
+        // groups（配列）をnum_groups個の空の配列で初期化する
+        let groups = Array.from({ length: getNumGroups() }, () => []);
+
+        // 法人ごとの出席者リストをシャッフルしてランダムな順序にする
+        corporateGroupsArray.forEach(group => shuffle(group));
+        console.log('corporateGroupsArray:', corporateGroupsArray);
+
+        // 各法人ごとにグループに割り当てる
+        let groupIndex = 0; // グループのインデックスを初期化（法人ごとに初期化されないように外に出す）
+        corporateGroupsArray.forEach(corporate => {
+            corporate.forEach(attendee => {
+                let attempts = 0; // attempts 変数を初期化
+                const maxAttempts = getNumGroups() * 2; // 最大試行回数を設定
+
+                // 第1回のラウンドに限り、firstGroup属性が設定されている出席者を優先的に割り当てる
+                if (round === 0 && Number.isInteger(attendee.firstGroup)
+                     && attendee.firstGroup > 0 && attendee.firstGroup <= getNumGroups()) {
+                    groupIndex = attendee.firstGroup - 1;
+                } else {
+                    // 過去に同じグループに入った出席者を避ける
+                    const previousGroupMembers = previousMembers.get(attendee.name) || [];
+                    while ((previousGroupMembers.some(member => groups[groupIndex].some(g => g.name === member))
+                         || groups[groupIndex].length >= getGroupSize()) && attempts < maxAttempts) {
+                        groupIndex = (groupIndex + 1) % getNumGroups(); // シーケンシャルに次のグループに移動
+                        attempts++;
+                    }
+
+                    // 最後のチェック：グループの人数が getGroupSize() を超えないようにする
+                    if (groups[groupIndex].length >= getGroupSize()) {
+                        let foundGroup = false;
+                        for (let i = 0; i < getNumGroups(); i++) {
+                            if (groups[i].length < getGroupSize()) {
+                                groupIndex = i;
+                                foundGroup = true;
+                                break;
+                            }
+                        }
+                        if (!foundGroup) {
+                            console.error(`No available group found for ${attendee.name}. This should not happen.`);
+                        }
+                    }
+                }
+
+                groups[groupIndex].push(attendee);  // 出席者をグループに追加
+                groupIndex = (groupIndex + 1) % getNumGroups(); // 次のグループに移動
+            });
+        });
+
+        // グループの人数が getMinGroupSize() を下回らないように調整
+        groups.forEach((group, index) => {
+            // グループの人数が getMinGroupSize() を下回らないように調整
+            while (group.length < getMinGroupSize()) {
+                // 他のグループからメンバーを移動
+                for (let i = 0; i < getNumGroups(); i++) {
+                    if (i !== index && groups[i].length > getMinGroupSize()) {
+                        group.push(groups[i].pop());
+                        break;
+                    }
+                }
+            }
+
+            // グループの人数が getGroupSize() を上回らないように調整
+            while (group.length > getGroupSize()) {
+                // 他のグループにメンバーを移動
+                for (let i = 0; i < getNumGroups(); i++) {
+                    if (i !== index && groups[i].length < getGroupSize()) {
+                        groups[i].push(group.pop());
+                        break;
+                    }
+                }
+            }
+        });
+
+        // 同じグループに入った出席者を記録
+        groups.forEach(group => {
+            group.forEach(attendee => {
+                if (!previousMembers.has(attendee.name)) { 
+                    previousMembers.set(attendee.name, []);
+                }
+                // 現在のグループのメンバーを追加
+                previousMembers.get(attendee.name).push(...group.map(member => member.name));
+            });
+        });
+
+        // 現在のラウンドのグループ分け結果を assignments に追加
+        assignments.push(groups);
+    }
+
+    // 全てのラウンドのグループ分け結果と previousMembers を返す
+    return { assignments, previousMembers };
+}
