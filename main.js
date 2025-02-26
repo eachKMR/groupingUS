@@ -1,1 +1,68 @@
-'use strict';const _0x34a5d3=_0x3913;(function(_0x29c687,_0x1e661d){const _0x2c4049=_0x3913,_0x427978=_0x29c687();while(!![]){try{const _0x335ff5=parseInt(_0x2c4049(0xac))/0x1+-parseInt(_0x2c4049(0xab))/0x2*(parseInt(_0x2c4049(0xa1))/0x3)+parseInt(_0x2c4049(0xb1))/0x4*(parseInt(_0x2c4049(0x9d))/0x5)+-parseInt(_0x2c4049(0xa4))/0x6+parseInt(_0x2c4049(0xb0))/0x7*(parseInt(_0x2c4049(0x9e))/0x8)+parseInt(_0x2c4049(0xa5))/0x9+-parseInt(_0x2c4049(0xa9))/0xa*(parseInt(_0x2c4049(0xad))/0xb);if(_0x335ff5===_0x1e661d)break;else _0x427978['push'](_0x427978['shift']());}catch(_0x5068fa){_0x427978['push'](_0x427978['shift']());}}}(_0x1e53,0x46716));import{handleFileChange}from'./fileHandlers.js';function _0x1e53(){const _0x4f3b21=['491260Dcopxf','44XytItq','change','addEventListener','749EELFRG','364316LPDZPM','input[name=\x22group-option\x22]:checked','value','DOMContentLoaded','querySelector','round-size-select','15OKoxDI','12568TNJdPA','createElement','group-button','12SyCKUm','option','target','1219074vWFpIw','1615059loIhMk','querySelectorAll','getElementById','appendChild','445150HmFjuW','click','221136wBxLXP'];_0x1e53=function(){return _0x4f3b21;};return _0x1e53();}import{handleGroupAssignment}from'./groupAssignment.js';function _0x3913(_0x46c08e,_0x16e6bc){const _0x1e53d6=_0x1e53();return _0x3913=function(_0x3913e3,_0x3326d3){_0x3913e3=_0x3913e3-0x9c;let _0x4db217=_0x1e53d6[_0x3913e3];return _0x4db217;},_0x3913(_0x46c08e,_0x16e6bc);}import{COLUMN_CORPORATE_NAME,COLUMN_DEPARTMENT,COLUMN_NAME,COLUMN_FURIGANA,COLUMN_PRESENT,initializeGroupSize,initializeRoundSize,getRoundSize,setRoundSize}from'./shareData.js';import{GROUP_SIZE,getGroupSize,setGroupSize,getMinGroupSize,ROUND_SIZE}from'./shareData.js';import{FURIGANA_INITIALS}from'./shareData.js';import{attendees}from'./shareData.js';import{setNumGroups,getNumGroups,isErrorNumGroups}from'./shareData.js';import{corporateGroups}from'./shareData.js';import{prepareAttendeeData}from'./fileHandlers.js';import{updateGroupSettings,isGroupingBySize}from'./GroupSettings.js';document['addEventListener'](_0x34a5d3(0xb4),function(){const _0x28ea50=_0x34a5d3;document[_0x28ea50(0xa7)]('xlsx-file-input')[_0x28ea50(0xaf)](_0x28ea50(0xae),handleFileChange);const _0x1c0808=document[_0x28ea50(0xa7)]('group-size-select');for(let _0x4d5bda=0x2;_0x4d5bda<=0x14;_0x4d5bda++){const _0xb4da79=document['createElement'](_0x28ea50(0xa2));_0xb4da79[_0x28ea50(0xb3)]=_0x4d5bda,_0xb4da79['textContent']=_0x4d5bda,_0x1c0808[_0x28ea50(0xa8)](_0xb4da79);}initializeGroupSize(),_0x1c0808[_0x28ea50(0xb3)]=getGroupSize();const _0x153422=document[_0x28ea50(0xa7)](_0x28ea50(0x9c));for(let _0x97166e=0x1;_0x97166e<=0xa;_0x97166e++){const _0x4ef9af=document[_0x28ea50(0x9f)](_0x28ea50(0xa2));_0x4ef9af['value']=_0x97166e,_0x4ef9af['textContent']=_0x97166e,_0x153422[_0x28ea50(0xa8)](_0x4ef9af);}initializeRoundSize(),_0x153422[_0x28ea50(0xb3)]=getRoundSize(),_0x153422[_0x28ea50(0xaf)]('change',_0x30d72b=>{const _0x2b61eb=_0x28ea50;setRoundSize(parseInt(_0x30d72b[_0x2b61eb(0xa3)][_0x2b61eb(0xb3)],0xa));}),_0x1c0808[_0x28ea50(0xaf)](_0x28ea50(0xae),_0x2f489e=>{const _0x5eb004=_0x28ea50,_0x55f83c=parseInt(_0x2f489e[_0x5eb004(0xa3)][_0x5eb004(0xb3)],0xa),_0x1dc33a=document[_0x5eb004(0xb5)](_0x5eb004(0xb2))['value'];updateGroupSettings(_0x55f83c,_0x1dc33a);}),document[_0x28ea50(0xa6)]('input[name=\x22group-option\x22]')['forEach'](_0x3498f8=>{const _0x52266f=_0x28ea50;_0x3498f8[_0x52266f(0xaf)](_0x52266f(0xae),()=>{const _0x42a567=_0x52266f,_0x376f2d=parseInt(_0x1c0808['value'],0xa),_0x3dd929=document['querySelector'](_0x42a567(0xb2))['value'];updateGroupSettings(_0x376f2d,_0x3dd929);});}),document['getElementById'](_0x28ea50(0xa0))['addEventListener'](_0x28ea50(0xaa),handleGroupAssignment);});
+'use strict';
+
+import { handleFileChange } from './fileHandlers.js';
+import { handleGroupAssignment } from './groupAssignment.js';
+// 定数の定義
+import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME,
+    COLUMN_FURIGANA, COLUMN_PRESENT, 
+    initializeGroupSize,
+    initializeRoundSize,
+    getRoundSize,
+    setRoundSize} from "./shareData.js"; // attendees配列について各列のインデックス
+import { GROUP_SIZE, getGroupSize, setGroupSize, getMinGroupSize, ROUND_SIZE } from "./shareData.js";
+import { FURIGANA_INITIALS } from "./shareData.js";
+import { attendees } from "./shareData.js";
+import { setNumGroups, getNumGroups, isErrorNumGroups } from './shareData.js';
+import { corporateGroups } from './shareData.js';
+
+import { prepareAttendeeData } from './fileHandlers.js';
+import { updateGroupSettings, isGroupingBySize } from './GroupSettings.js';
+
+document.addEventListener('DOMContentLoaded', function() {
+    // ファイル入力フィールドに変更があったときの処理を登録
+    document.getElementById('xlsx-file-input').addEventListener('change', handleFileChange);
+
+    const groupSizeSelect = document.getElementById('group-size-select');
+    for (let i = 2; i <= 30; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        groupSizeSelect.appendChild(option);
+    }
+    initializeGroupSize();  // グループサイズを初期化
+    groupSizeSelect.value = getGroupSize();  // デフォルトのグループサイズを設定
+
+    const roundSizeSelect = document.getElementById('round-size-select');
+    for (let i = 1; i <= 10; i++) { // 例として1から10までのラウンド数を設定
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        roundSizeSelect.appendChild(option);
+    }
+    initializeRoundSize();  // ラウンド数を初期化
+    roundSizeSelect.value = getRoundSize();  // デフォルトのラウンド数を設定
+
+    // 数値が変更されたときの処理を登録
+    roundSizeSelect.addEventListener('change', (event) => {
+        setRoundSize( parseInt(event.target.value, 10) );
+    });
+
+    // 数値が変更されたときの処理を登録
+    groupSizeSelect.addEventListener('change', (event) => {
+        const selectedValue = parseInt(event.target.value, 10);
+        const selectedOption = document.querySelector('input[name="group-option"]:checked').value;
+        updateGroupSettings(selectedValue, selectedOption);
+    });
+
+    // ラジオボタンの選択が変更されたときの処理を登録
+    document.querySelectorAll('input[name="group-option"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const selectedValue = parseInt(groupSizeSelect.value, 10);
+            const selectedOption = document.querySelector('input[name="group-option"]:checked').value;
+            updateGroupSettings(selectedValue, selectedOption);
+        });
+    });
+
+    // 「グループ決め」ボタンがクリックされたときの処理を登録
+    document.getElementById('group-button').addEventListener('click', handleGroupAssignment);
+});

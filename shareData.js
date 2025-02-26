@@ -28,13 +28,13 @@ export let GROUP_SIZE = 0; // グループのサイズ（初期値を0に設定�
 export function getGroupSize() { return GROUP_SIZE; }
 export function setGroupSize(value) { GROUP_SIZE = value; }
 export function getMinGroupSize() { return GROUP_SIZE - 1; } // グループの最小サイズ
-export function initializeGroupSize() { GROUP_SIZE = 5; }
+export function initializeGroupSize() { GROUP_SIZE = 4; }
 
 
 export let ROUND_SIZE = 0; // グループ分けのラウンド数
 export function getRoundSize() { return ROUND_SIZE; }
 export function setRoundSize(value) { ROUND_SIZE = value; }
-export function initializeRoundSize() { ROUND_SIZE = 1; }
+export function initializeRoundSize() { ROUND_SIZE = 3; }
 
 export const FURIGANA_INITIALS = ['ア', 'カ', 'サ', 'タ', 'ナ', 'ハ', 'マ', 'ヤ', 'ラ', 'ワ', 'その他']; // フリガナの初期文字のリスト
 
