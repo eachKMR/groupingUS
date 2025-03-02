@@ -1,18 +1,19 @@
 import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME, COLUMN_FURIGANA, COLUMN_PRESENT,
-    GROUP_SIZE, getGroupSize, setGroupSize, getMinGroupSize, ROUND_SIZE,
     FURIGANA_INITIALS,
-    attendees,
+     } from './shareData.js'; 
+
+import { renderGroupResults, displayResultsModal } from './renderGroupResults.js';
+import { setCountOfAttendees } from './shareData.js';
+import { isGroupingBySize,getGroupSize, setGroupSize, getAdjustedMinGroupSize,
     corporateGroups,
     clearCorporateGroups, setCorporateGroup, 
     setNumGroups,
     getNumGroups,
     isErrorNumGroups,
-    getRoundSize, } from './shareData.js'; 
+    updateGroupSettings,
+    getRoundSize, } from './GroupSettings.js';
 
-import { renderGroupResults, displayResultsModal } from './renderGroupResults.js';
-import { isGroupingBySize } from './GroupSettings.js';
-
-'use strict';
+    'use strict';
 
 // シャッフル関数（フィッシャー・イェーツのシャッフル）
 function shuffle(array) {
@@ -26,53 +27,24 @@ function shuffle(array) {
 // 出席（予定）者を【present===1】でフィルタリングして当日の出席者を返す関数
 export function createPresentCorporateGroups() {
     const presentCorporateGroups = new Map();
+    let totalAttendees = 0; // 出席者の総数を保持する変数を追加
+
     corporateGroups.forEach((corporateAttendees, corporateName) => { // 法人ごとに処理
         const filteredGroup = corporateAttendees.filter(attendee => attendee.present === 1);
         if (filteredGroup.length > 0) {
             presentCorporateGroups.set(corporateName, filteredGroup);
+            totalAttendees += filteredGroup.length; // 出席者の総数を更新
         }
     });
+
+    setCountOfAttendees(totalAttendees); // 出席者の総数を設定
     return presentCorporateGroups;
-}
-
-// グループ数を計算する関数
-export function calculateNumGroups(presentCorporateGroups) {
-    const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   
-    setNumGroups(Math.ceil(totalAttendees / getGroupSize()));   // グループ数を割り出す（小数点切り上げ）
-    // console.log(`Group size: ${getGroupSize()}  Num groups: ${getNumGroups()}`);
-    if (isErrorNumGroups()) {
-        console.error('Error: isErrorNumGroups() === true. Cannot assign groups.');
-        alert('グループ分けできません。出席者がいないか、１グループあたりの人数が大きすぎます。');
-        return false;
-    }
-    return true;
-}
-
-// グループあたりの人数を計算する関数
-function calculateGroupSize(presentCorporateGroups) {
-    const totalAttendees = Array.from(presentCorporateGroups.values()).flat().length;   // 出席者の総数
-    setGroupSize(Math.ceil(totalAttendees / getNumGroups()));   // グループあたりの人数を割り出す（小数点切り上げ）
-    // console.log(`Group size: ${getGroupSize()}  Num groups: ${getNumGroups()}`);
-    if (getGroupSize() <= 0) {
-        console.error('Error: getGroupSize() <= 0. Cannot assign groups.');
-        alert('グループ分けできません。グループ数が多すぎます。');
-        return false;
-    }
-    return true;
 }
 
 // グループ分けボタンがクリックされたときの処理
 export function handleGroupAssignment() {
     const presentCorporateGroups = createPresentCorporateGroups();
-    if (isGroupingBySize()) {   // ラジオボタンが「グループ人数」の場合
-        if (!calculateNumGroups(presentCorporateGroups)) {  // グループ数を計算
-            return;
-        }
-    } else {                    // ラジオボタンが「グループ数」の場合
-        if (!calculateGroupSize(presentCorporateGroups)) {  // グループあたりの人数を計算
-            return; 
-        }
-    }
+    updateGroupSettings();  // グループ分け基準の設定を更新
 
     // グループ分けを実行
     const { assignments, previousMembers } = assignBalancedGroups(presentCorporateGroups);
@@ -144,13 +116,13 @@ export function assignBalancedGroups(presentCorporateGroups) {
             });
         });
 
-        // グループの人数が getMinGroupSize() を下回らないように調整
+        // グループの人数が getAdjustedMinGroupSize() を下回らないように調整
         groups.forEach((group, index) => {
-            // グループの人数が getMinGroupSize() を下回らないように調整
-            while (group.length < getMinGroupSize()) {
+            // グループの人数が getAdjustedMinGroupSize() を下回らないように調整
+            while (group.length < getAdjustedMinGroupSize()) {
                 // 他のグループからメンバーを移動
                 for (let i = 0; i < getNumGroups(); i++) {
-                    if (i !== index && groups[i].length > getMinGroupSize()) {
+                    if (i !== index && groups[i].length > getAdjustedMinGroupSize()) {
                         group.push(groups[i].pop());
                         break;
                     }

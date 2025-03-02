@@ -1,9 +1,9 @@
 'use strict';
 
 // 必要な関数をインポート
-import { getGroupSize } from './shareData.js';
+import { getGroupSize } from './GroupSettings.js';
 import { saveGroupResult } from './saveGroupResult.js';
-import { createPresentCorporateGroups, assignBalancedGroups, calculateNumGroups } from './groupAssignment.js';
+import { createPresentCorporateGroups, assignBalancedGroups, } from './groupAssignment.js';
 
 // モジュールスコープの変数として宣言
 let groupAssignments;
@@ -32,6 +32,7 @@ export function renderGroupResults(assignments, previousMembers) {
     roundDiv.style.font = 'bold 16px Meiryo sans-serif';
 
     const table = document.createElement('table');
+    // table.classList.add('group-table'); // CSSクラスを追加
     const thead = document.createElement('thead');
     const tbody = document.createElement('tbody');
 
@@ -153,9 +154,6 @@ export function displayResultsModal(initialGroupAssignments, previousMembers) {
     // ボタンのイベントリスナーを設定
     regroupButton.addEventListener('click', function () {
         const presentCorporateGroups = createPresentCorporateGroups();
-        // if (!calculateNumGroups(presentCorporateGroups)) {
-        //     return;
-        // }
 
         const { assignments, previousMembers: newPreviousMembers } = assignBalancedGroups(presentCorporateGroups);
         renderGroupResults(assignments, newPreviousMembers);

@@ -1,9 +1,11 @@
 import { COLUMN_CORPORATE_NAME, COLUMN_DEPARTMENT, COLUMN_NAME, COLUMN_FURIGANA, COLUMN_PRESENT, COLUMN_FIRSTGROUP,
-        FURIGANA_INITIALS,
-        attendees,
-        clearAttendees, addAttendee,
-        corporateGroups,
-        clearCorporateGroups, setCorporateGroup } from './shareData.js';
+    FURIGANA_INITIALS,
+    clearScheduledAttendees, addScheduledAttendee, getScheduledAttendees,
+    setCountOfAttendees, getCountOfAttendees,
+ } from './shareData.js'; // shareData.jsからインポート
+import { enableGroupingContainer,
+    clearCorporateGroups, getCorporateGroups, setCorporateGroup, getMostAttendeesCorporation,
+ } from './GroupSettings.js'; // GroupSettingsからインポート
 
 'use strict';
 
@@ -14,18 +16,19 @@ let corporations = []; // 法人名のリスト
 let selectedCorporation = ''; // 現在選択されている法人名
 let selectedFurigana = 'ア'; // 現在選択されているフリガナの初期文字
 
+// ファイル入力フィールドの変更時の処理
 export function handleFileChange(event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
-        // console.log('File selected:', file);
         reader.onload = handleFileLoad; // ファイル読み込み完了時の処理を登録
         reader.readAsArrayBuffer(file); // ファイルをバイナリ形式で非同期に読み込む
-               // 読み込みが成功したら grouping-container を有効化する
-               enableGroupingContainer();
+        // 読み込みが成功したら grouping-container を有効化する
+        // enableGroupingContainer();
     }
 }
 
+// ファイル読み込み完了時の処理
 export function handleFileLoad(e) {
     console.log('File loaded:', e);
     try {
@@ -35,37 +38,32 @@ export function handleFileLoad(e) {
         const worksheet = workbook.Sheets[sheetName];
         const parsedAttendees = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         console.log('Parsed attendees:', parsedAttendees);
-        clearAttendees(); // attendees配列を初期化
-        parsedAttendees.forEach(row => addAttendee(row)); // パースしたデータをattendees配列に追加
+        clearScheduledAttendees(); // scheduledAttendees配列を初期化
+        parsedAttendees.forEach(row => addScheduledAttendee(row)); // パースしたデータをscheduledAttendees配列に追加
         prepareAttendeeData();
+        setCountOfAttendees(parsedAttendees.length - 1); // 先頭行はヘッダー行なので除外
+        // 読み込みが完了したらグループ分けコンテナを有効化する
+        enableGroupingContainer();
     } catch (error) {
         console.error('Error reading file:', error);
         alert('ファイルの読み込み中にエラーが発生しました。');
     }
 }
 
-// ファイルが正しく読み込まれた後に grouping-container を有効化する関数
-function enableGroupingContainer() {
-    const groupingContainer = document.querySelector('.grouping-container');
-    groupingContainer.classList.remove('disabled');
-    groupingContainer.querySelectorAll('select, input, .group-button').forEach(element => {
-        element.disabled = false;
-    });
-}
-
 // 出席者データを準備する関数
 export function prepareAttendeeData() {
+    const scheduledAttendees = getScheduledAttendees();
     const companyMap = new Map();
     const furiganaMap = new Map(FURIGANA_INITIALS.map(initial => [initial, []]));
-    attendees.forEach((attendee, index) => {
+    scheduledAttendees.forEach((scheduled, index) => {
         if (index === 0) return;
         const [corporateName, department, name, furigana, present, firstGroup] = [
-            attendee[COLUMN_CORPORATE_NAME],
-            attendee[COLUMN_DEPARTMENT],
-            attendee[COLUMN_NAME],
-            attendee[COLUMN_FURIGANA],
-            attendee[COLUMN_PRESENT],
-            attendee[COLUMN_FIRSTGROUP] || '' // F列が空の場合は空文字列を設定
+            scheduled[COLUMN_CORPORATE_NAME],
+            scheduled[COLUMN_DEPARTMENT],
+            scheduled[COLUMN_NAME],
+            scheduled[COLUMN_FURIGANA],
+            scheduled[COLUMN_PRESENT],
+            scheduled[COLUMN_FIRSTGROUP] || '' // F列が空の場合は空文字列を設定
         ];
         if (!corporateName || !department || !name) return;
         if (!companyMap.has(corporateName)) {
@@ -94,7 +92,6 @@ export function prepareAttendeeData() {
     });
     clearCorporateGroups(); // 既存のデータをクリア
     companyMap.forEach((value, key) => setCorporateGroup(key, value)); // 新しいデータをセット
-    console.log('corporateGroups:', corporateGroups);
     console.log('furiganaGroups:', furiganaGroups);
     selectedCorporation = getMostAttendeesCorporation();
     updateTable();
@@ -121,19 +118,6 @@ export function getFuriganaInitial(char) {
     return 'その他';
 }
 
-// 最も多くの出席者を持つ法人名を取得する関数
-export function getMostAttendeesCorporation() {
-    let maxCount = 0;
-    let mostAttendeesCorporation = '';
-    corporateGroups.forEach((attendees, corporation) => {
-        if (attendees.length > maxCount) {
-            maxCount = attendees.length;
-            mostAttendeesCorporation = corporation;
-        }
-    });
-    return mostAttendeesCorporation;
-}
-
 // タブの内容を更新する関数
 export function updateTabs(containerId, items, onClick) { // 引数：id, 法人名またはフリガナのリスト, クリック時の処理
     const tabsContainer = document.getElementById(containerId);
@@ -145,7 +129,7 @@ export function updateTabs(containerId, items, onClick) { // 引数：id, 法人
         tab.onclick = () => onClick(item);
         tabsContainer.appendChild(tab);
     });
-    const activeTab = Array.from(tabsContainer.children).find(tab => 
+    const activeTab = Array.from(tabsContainer.children).find(tab =>
         tab.textContent === (containerId === 'corporation-tabs' ? selectedCorporation : selectedFurigana));
     if (activeTab) {
         activeTab.classList.add('active');
@@ -176,6 +160,7 @@ function updateTable() {
 
     const tbody = document.getElementById('attendees-body'); // テーブルのtbody要素を取得
     tbody.innerHTML = '';
+    const corporateGroups = getCorporateGroups(); // corporateGroupsを取得
     if (selectedCorporation && corporateGroups.has(selectedCorporation)) { // 選択された法人名が出席者リストに存在する場合
         let attendees = corporateGroups.get(selectedCorporation).filter(attendee => {
             const initial = attendee.furigana ? getFuriganaInitial(attendee.furigana.charAt(0)) : 'その他';
@@ -205,12 +190,13 @@ function updateTable() {
 }
 
 export function saveCheckboxState() {
-    const checkboxes = document.querySelectorAll('.attendance-checkbox'); 
+    const checkboxes = document.querySelectorAll('.attendance-checkbox');
     checkboxes.forEach(checkbox => {
         const index = parseInt(checkbox.getAttribute('data-index'), 10); // チェックボックスのdata-index属性を取得
         const present = checkbox.checked ? 1 : 0; // presentの値を設定
 
         // corporateGroupsマップの各要素に対して
+        const corporateGroups = getCorporateGroups(); // corporateGroupsを取得
         corporateGroups.forEach(attendees => {
             const attendee = attendees.find(attendee => attendee.index === index);
             if (attendee) {
@@ -218,8 +204,8 @@ export function saveCheckboxState() {
             }
         });
 
-        // attendees配列の対応する要素を更新
-        const attendee = attendees[index];
+        // scheduledAttendees配列の対応する要素を更新
+        const attendee = getScheduledAttendees()[index];
         if (attendee) {
             attendee[COLUMN_PRESENT] = present;
         }

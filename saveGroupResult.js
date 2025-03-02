@@ -1,4 +1,4 @@
-import { corporateGroups } from './shareData.js';
+import { corporateGroups } from './GroupSettings.js';
 
 // 偶数文字目を '●' に置き換える関数
 function maskName(name) {
